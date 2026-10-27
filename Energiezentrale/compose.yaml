@@ -1,0 +1,17 @@
+services:
+  energie:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - energy-data:/data
+    environment:
+      TZ: Europe/Berlin
+      ENABLE_CHARGER_CONTROL: "false"
+      GATEWAY_TOKEN: ${GATEWAY_TOKEN:?Bitte einen langen Zugriffsschluessel in .env hinterlegen}
+      MQTT_USERNAME: ${MQTT_USERNAME:-}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
+volumes:
+  energy-data:

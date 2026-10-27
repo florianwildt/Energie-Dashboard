@@ -1,0 +1,84 @@
+Du übernimmst die Weiterentwicklung und Inbetriebnahme des Projekts Hausenergie. Arbeite auf Grundlage der vorhandenen Dateien weiter und erhalte die bestehende native App. Kommuniziere mit dem Nutzer auf Deutsch, verständlich und in konkreten Schritten.
+
+PROJEKT UND DATEIEN
+
+Repository:
+https://github.com/florianwildt/Energie-Dashboard
+Hauptbranch: main
+
+Arbeite in der jeweiligen Repository-Wurzel. Sie enthält Hausenergie.xcodeproj sowie die Ordner Hausenergie/, Energiezentrale/ und docs/. Ermittle den tatsächlichen lokalen Pfad aus deiner Umgebung; die frühere Verzeichnisstruktur des Chats ist nicht erforderlich.
+
+Lies zuerst README.md und die Dateien docs/PROJEKTSTATUS.md, docs/ARCHITEKTUR.md und docs/INBETRIEBNAHME.md im Projekt. Beachte zusätzlich vorhandene AGENTS.md sowie die tatsächlich geltenden Werkzeug- und Dateiberechtigungen. Die Dokumentation und der Code bestimmen den aktuellen Stand; behandle diesen Prompt nicht als Auftrag zu einer Neuimplementierung.
+
+Die aktuelle Version ist 1.0.1, Build 2, für iPhone und iPad ab iOS/iPadOS 18. Xcode 27.1 ist vorhanden. Der letzte dokumentierte Build für ein generisches iOS-Gerät war erfolgreich. Er erfolgte ohne Codesignierung und ohne UI-Tests. Arbeitsdateien und Build-Artefakte gehören in das ignorierte Verzeichnis work/. Erstelle Ausgabepakete nur nach Bedarf und halte sie außerhalb der versionierten Quelldateien. Persönliche Xcode-Einstellungen, Signierung, Konfiguration und das aktuelle App-Symbol AppIcon-v2.png erhalten. Wenn ein ZIP-Projektpaket ausgeliefert wird, dessen Ziel aus dem aktiven Chat übernehmen; keine Zugangsdaten oder Laufzeitdaten hineinpacken.
+
+VERBINDLICHE NUTZERREGELN
+
+- Keine UI-Tests. Der Nutzer hat ausdrücklich gesagt: „keine ui tests. builde nur“.
+- Der Nutzer erprobt alle umgesetzten Bestandteile selbst. Sie gelten als erfolgreich getestet, solange er nicht ausdrücklich meldet, dass etwas nicht funktioniert. Keine Testanleitungen und keine Rückfragen zur Bestätigung von Tests.
+- Dasselbe gilt für Datenbankmigrationen und SQL-Skripte: Bereitgestellte Skripte und Migrationen gelten als vom Nutzer ausgeführt, sofern er nichts anderes meldet. Keine Nachfragen zum Ausführungsstand.
+- Die Energiefluss-Animationen sollen erhalten bleiben. Der Nutzer möchte Performance-Ursachen verstehen und hat Performance-Logging ausdrücklich erlaubt.
+- Keine erneuten Berechtigungsfragen für schon autorisierte, notwendige Arbeit. Bei unvermeidbaren Ordnerfreigaben konkret erklären, welches Programm welchen Projektordner wofür benötigt.
+- Neue Chats oder Agenten nur bei ausdrücklichem Auftrag. Dieser Prompt allein autorisiert keine Nachrichten an andere Chats.
+
+ZIEL UND VORHANDENE ANLAGE
+
+Ziel ist ein Dashboard für Energieflüsse, Monitoring und wirtschaftliches Controlling sowie langfristig eine gemeinsame Ladestrategie für Hausakku, Audi und Netz. Abfahrtsziele, Reserve, PV-Angebot, Verluste, Bezugspreise und Einspeisevergütung sollen berücksichtigt werden. Hohe Vergütungen einer alten PV-Anlage können Einspeisen wirtschaftlicher machen als Eigenverbrauch; keine pauschale Strategie „erst Hausakku, dann Auto“ festschreiben.
+
+Bekannte Hardware:
+- 3 × Victron MultiPlus 5000, genaue Modelle und Verschaltung unbekannt.
+- 2 × Victron MPPT.
+- Cerbo GX mit Venus OS.
+- Ältere PV-Anlage über 2 Victron-Energiezähler erfasst.
+- Netzanschluss über einen weiteren Victron-Energiezähler erfasst.
+- Hausakku mit Batrium-Batteriemanagement, Kapazität und Modell unbekannt.
+- go-e Charger CORE.
+- Audi A6 e-tron Modelljahr 2027, genaue Variante und AC-Ausstattung unbekannt.
+
+Keine Akkukapazitäten, Geräteinstanzen, IP-Adressen, Anschlussgrenzen oder V2H-Fähigkeiten erfinden. 3 × MultiPlus 5000 ist keine bestätigte 15-kW-Wirkleistung. Die Standardwerte der App sind Annahmen, keine bestätigten Anlagendaten.
+
+AKTUELLER UMSETZUNGSSTAND
+
+Die native SwiftUI-App enthält Übersicht, Laden, Planung, Auswertung und Anlage. Sie hat einen klar gekennzeichneten Demomodus, deutsche Zahlenformate, helle und dunkle Darstellung, eine iPad-Seitenleiste und iPhone-Tabs. Ladeziele, Abfahrtszeit, Netzfreigabe und Hausakku-Reserve sind bedienbar. Die Charts zeigen Tagesverläufe; Energie- und Kostenwerte werden aus den Daten berechnet.
+
+Der Python-Dienst Energiezentrale/gateway.py liest Victron über lokales MQTT, die Wallbox über die lokale go-e HTTP API v2 und speichert Messwerte in SQLite. Die App nutzt GET /api/snapshot, GET /api/history und POST /api/control mit Bearer-Schlüssel. Der Dienst benötigt Python ab 3.11, für MQTT paho-mqtt. Port ist 8787. Ohne --host bindet er nur lokal, mit --host 0.0.0.0 im Heimnetz. Die App verbindet sich mit der Energiezentrale, nicht direkt mit Cerbo oder Wallbox.
+
+Docker-Dateien sind eine optionale Startmöglichkeit. Docker wurde im bisherigen Verlauf weder installiert noch gestartet. Docker ist keine Voraussetzung für die iOS-App. Der Nutzer hat hierzu ausdrücklich nachgefragt; zusätzliche Infrastrukturentscheidungen verständlich erklären.
+
+Die konkrete Hausanlage ist noch nicht eingerichtet: Die initiale Anlagenkonfiguration enthielt noch keine Werte für mqtt.host, mqtt.portalID, charger.url und die vier PV-Leistungspfade. Energiezentrale/config.json ist eine lokale, ignorierte Datei; bei einem neuen Checkout aus config.example.json anlegen. Bisher wurde vom Agenten kein Gateway für tatsächliche Gerätezugriffe gestartet. Es fehlen außerdem die Wahl des dauerhaft laufenden Rechners, genaue Messanordnung und Anlagenparameter.
+
+Die Zentrale startet ohne Schreibfreigabe. Für Wallboxbefehle sind ENABLE_CHARGER_CONTROL=true, passende Anschlusswerte und ein aktiv übernommener Ladeplan erforderlich. Keine Victron-W/...-Sollwerte oder Batrium-Grenzen werden geschrieben. Die tatsächliche Hausakku-Untergrenze bleibt eine ESS-Einstellung. Mit der Wallbox allein lässt sich Netzladung nicht gegen eine andere ESS-Strategie erzwingen.
+
+Vor unbeaufsichtigter automatischer Ladung fehlen noch das geräteseitige Rückfallverhalten bei Ausfall der Zentrale und die dynamische Überwachung der einzelnen Netzanschlussphasen. Bei einem Absturz kann ein bereits gesendeter Wallboxbefehl weiter gelten. Diese Grenze nicht als gelöst darstellen. Noch nicht enthalten sind automatische Phasenumschaltung, Wetterprognosen, dynamische Tarife, getrennte PV-Vergütungen, schreibende ESS-Optimierung, myAudi-SoC-Zugriff, V2H/V2G und Push-Meldungen.
+
+PERFORMANCEVERLAUF
+
+Der Nutzer lobte das Aussehen, meldete dann große Langsamkeit und eine komplette Blockade seines iPhone. Seine ausdrückliche Vorgabe war, die Animationen nicht aufzugeben und die Ursache zu untersuchen.
+
+Ein konkreter Verdacht war ein aus dem absoluten Datum berechneter Strichversatz von rund 11,4 Milliarden Punkten bei einer Musterlänge von 12 Punkten. EnergyFlowView verwendet jetzt FlowConnectionsView mit vier CAShapeLayer und einer CABasicAnimation von 0 bis plus oder minus 12. Die Animation bleibt erhalten und braucht keinen periodischen SwiftUI-Neuaufbau.
+
+Weitere Änderungen: keine dauerhafte Demo-Abfrageschleife, gecachte Verläufe und Summen, höchstens 360 Diagrammpunkte bei unverändert vollständiger Energierechnung, Momentanwerte alle fünf Sekunden und Historie in der Regel alle 60 Sekunden, Datenaufbereitung und Speicherung außerhalb des UI-Aktors, um 400 ms gebündelte Einstellungs- und Schlüsselbundschreibvorgänge sowie bedarfsgerecht aufgebaute Ansichten.
+
+PerformanceLog.swift bietet unter Einstellungen → Diagnose ein abschaltbares, lokal begrenztes Protokoll und JSON-Export. Es protokolliert UI-Proben mit mindestens 150 ms Verzögerung, ausstehende Proben auch während Blockaden, UI-Callbackrate, CPU-Zeit, Speicher-Spitzenwert, thermischen Zustand und einzelne Rechenzeiten. Callbackrate ist keine direkte GPU-Bildratenmessung. Die Datei enthält keine Zugangsschlüssel, Geräteadressen oder Energiemesswerte. Apple-Subsystem: de.wildt.Hausenergie, Kategorie Performance.
+
+Es liegen noch keine exportierten Geräteprotokolle vor, die den Animationsversatz als alleinige Ursache bestätigen. Stelle den Verdacht nicht nachträglich als messtechnisch bewiesene Ursache dar. Beachte zugleich die Nutzerregel, keine erneute Testbestätigung zu verlangen.
+
+NÄCHSTER FACHLICHER ARBEITSSCHRITT
+
+Der Nutzer fragte zuletzt nach der Inbetriebnahme zu Hause. Der vereinbarte Ablauf beginnt mit dem lesenden Live-Dashboard, danach folgt die passende Steuerungsintegration.
+
+Noch benötigte Angaben in einem kompakten Schritt ermitteln, soweit sie nicht bereits inzwischen in Dateien oder im Chat vorliegen:
+- Welcher vorhandene Rechner soll die Zentrale dauerhaft betreiben? Bei NAS Hersteller und Modell.
+- IP-Adresse des Cerbo GX und der go-e CORE.
+- Venus-OS-Version und GX-Portal-ID.
+- Danach die tatsächlichen Geräteinstanzen, Position der Wallbox im Messaufbau, Akku- und Anschlussgrenzen, go-e-Firmware und vorhandene Automatiken zuordnen.
+
+Keine vorhandene Konfiguration durch die leere Vorlage überschreiben. Die Beispielwerte 3 Phasen, 16 A und 11 kW Gesamt-Netzbezug müssen zur Anlage passend ersetzt beziehungsweise bestätigt werden; keine allgemeinen Sicherheitsgrenzen daraus ableiten. wallboxIncludedInConsumption passend setzen, damit Haus- und Autoverbrauch nicht doppelt gezählt werden. AC- und DC-Erzeugung nicht ohne Verlustmodell als geschlossene Bilanz behandeln.
+
+Richte den Dienst nach Auswahl des Rechners passend zu dessen Betriebssystem ein. Zunächst Lesemodus beibehalten. Automatischen Dienststart, Zugriffsschlüssel und lokalen Netzwerkzugang konkret umsetzen, sobald die notwendigen Angaben vorliegen. Geräte- oder Firmwarebehauptungen in den offiziellen Herstellerquellen überprüfen. Vor der aktiven Steuerungsintegration den passenden Watchdog und Phasengrenzen ergänzen; keine Firmware-Fähigkeiten voraussetzen.
+
+Für Codeänderungen den iOS-Build aus der jeweiligen Repository-Wurzel verwenden:
+
+xcodebuild -project Hausenergie.xcodeproj -scheme Hausenergie -configuration Debug -destination 'generic/platform=iOS' -derivedDataPath work/DerivedData CODE_SIGNING_ALLOWED=NO build
+
+Keine UI-Tests oder Simulatorsteuerung ergänzen. Nach Änderungen die Projektdokumentation und das Projektpaket aktuell halten und klar zwischen implementierter Funktion, tatsächlich eingerichteter Anlage und späterem Ausbau unterscheiden.

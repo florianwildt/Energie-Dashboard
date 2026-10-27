@@ -1,0 +1,35 @@
+{
+  "mqtt": {
+    "host": "",
+    "port": 1883,
+    "portalID": "",
+    "tls": false,
+    "caFile": ""
+  },
+  "charger": {
+    "url": "",
+    "phases": 3,
+    "maxCurrentA": 16,
+    "maxGridImportKW": 11
+  },
+  "wallboxIncludedInConsumption": true,
+  "sensors": {
+    "gridKW": {
+      "paths": ["system/0/Ac/Grid/L1/Power", "system/0/Ac/Grid/L2/Power", "system/0/Ac/Grid/L3/Power"],
+      "scale": 0.001
+    },
+    "houseTotalKW": {
+      "paths": ["system/0/Ac/Consumption/L1/Power", "system/0/Ac/Consumption/L2/Power", "system/0/Ac/Consumption/L3/Power"],
+      "scale": 0.001
+    },
+    "batteryKW": {"paths": ["system/0/Dc/Battery/Power"], "scale": 0.001},
+    "batterySOC": {"paths": ["system/0/Dc/Battery/Soc"], "scale": 1},
+    "batteryTemperature": {"paths": ["system/0/Dc/Battery/Temperature"], "scale": 1}
+  },
+  "solarSources": [
+    {"id": "mppt1", "name": "MPPT 1", "paths": [], "scale": 0.001},
+    {"id": "mppt2", "name": "MPPT 2", "paths": [], "scale": 0.001},
+    {"id": "pv1", "name": "Bestandsanlage · Zähler 1", "paths": [], "scale": 0.001},
+    {"id": "pv2", "name": "Bestandsanlage · Zähler 2", "paths": [], "scale": 0.001}
+  ]
+}
